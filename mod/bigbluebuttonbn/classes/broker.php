@@ -153,6 +153,7 @@ class broker {
 
             // Get JSON string from the body.
             $jsonstr = file_get_contents('php://input');
+            debugging("Payload received:\n$jsonstr", DEBUG_DEVELOPER);
 
             // Convert JSON string to a JSON object.
             $jsonobj = json_decode($jsonstr);
