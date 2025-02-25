@@ -99,6 +99,32 @@ class renderer extends plugin_renderer_base {
     }
 
     /**
+     * Render the view page for recordings.
+     *
+     * @param view_page_recordings $page
+     * @return string
+     */
+    public function render_view_page_recordings(view_page_recordings $page): string {
+        return $this->render_from_template(
+            'mod_bigbluebuttonbn/view_page_recordings',
+            $page->export_for_template($this)
+        );
+    }
+
+    /**
+     * Render the view page for recordings plain.
+     *
+     * @param view_page_recordings_plain $page
+     * @return string
+     */
+    public function render_view_page_recordings_plain(view_page_recordings_plain $page): string {
+        return $this->render_from_template(
+            'mod_bigbluebuttonbn/view_page_recordings_plain',
+            $page->export_for_template($this)
+        );
+    }
+
+    /**
      * Render inplace editable
      *
      * @param inplace_editable $e

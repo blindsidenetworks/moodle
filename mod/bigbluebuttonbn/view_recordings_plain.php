@@ -15,22 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * View a BigBlueButton room.
+ * View a BigBlueButton recordings.
  *
  * @package   mod_bigbluebuttonbn
- * @copyright 2010 onwards, Blindside Networks Inc
+ * @copyright 2025 onwards, Blindside Networks Inc
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
- * @author    Fred Dixon  (ffdixon [at] blindsidenetworks [dt] com)
- * @author    Darko Miletic  (darko.miletic [at] gmail [dt] com)
+ * @author    Shamiso Jaravaza (shamiso.jaravaza [at] blindsidenetworks [dt] com)
  */
 
 use mod_bigbluebuttonbn\instance;
 use mod_bigbluebuttonbn\local\config;
 use mod_bigbluebuttonbn\local\exceptions\server_not_available_exception;
 use mod_bigbluebuttonbn\local\proxy\bigbluebutton_proxy;
-use mod_bigbluebuttonbn\logger;
-use mod_bigbluebuttonbn\output\view_page;
+use mod_bigbluebuttonbn\output\view_page_recordings_plain;
 use mod_bigbluebuttonbn\plugin;
 
 require(__DIR__ . '/../../config.php');
@@ -57,22 +55,11 @@ $bigbluebuttonbn = $instance->get_instance_data();
 
 require_login($course, true, $cm);
 
-$groupid = groups_get_activity_group($cm, true) ?: null;
-if ($groupid) {
-    $instance->set_group_id($groupid);
-}
-
-logger::log_instance_viewed($instance);
-
 // Require a working server.
 bigbluebutton_proxy::require_working_server($instance);
 
-// Mark viewed by user (if required).
-$completion = new completion_info($course);
-$completion->set_module_viewed($cm);
-
 // Print the page header.
-$PAGE->set_url($instance->get_view_url());
+$PAGE->set_url($instance->get_page_url('view_recordings_plain'));
 $PAGE->set_title($cm->name);
 $PAGE->set_cacheable(false);
 $PAGE->set_heading($course->fullname);
@@ -81,7 +68,7 @@ $PAGE->set_heading($course->fullname);
 $renderer = $PAGE->get_renderer('mod_bigbluebuttonbn');
 
 try {
-    $renderedinfo = $renderer->render(new view_page($instance));
+    $renderedinfo = $renderer->render(new view_page_recordings_plain($instance));
 } catch (server_not_available_exception $e) {
     bigbluebutton_proxy::handle_server_not_available($instance);
 }
@@ -96,18 +83,6 @@ if (config::server_credentials_invalid()) {
             ['settingslink' => $settingslink->out()]), 'notifywarning');
     } else if (has_capability('moodle/course:manageactivities', context_course::instance($course->id))) {
         echo $OUTPUT->notification(get_string('settings_credential_warning_no_capability', 'bigbluebuttonbn'), 'notifywarning');
-    }
-}
-
-// Validate if the user is in a role allowed to join.
-if (!$instance->can_join() && $instance->get_type() != instance::TYPE_RECORDING_ONLY) {
-    if (isguestuser()) {
-        notice(get_string('view_noguests', plugin::COMPONENT), get_login_url());
-    } else {
-        notice(
-            get_string('view_nojoin', plugin::COMPONENT),
-            new moodle_url('/course/view.php', ['id' => $course->id])
-        );
     }
 }
 
